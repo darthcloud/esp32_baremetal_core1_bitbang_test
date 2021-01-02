@@ -1,0 +1,32 @@
+From fbca3d4999124361002cf13965aeab610c6ad2dc Mon Sep 17 00:00:00 2001
+From: Jacques Gagnon <darthcloud@gmail.com>
+Date: Mon, 4 Jan 2021 08:51:19 -0500
+Subject: [PATCH 1/2] hook core1 init
+
+---
+ components/esp32/cpu_start.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/components/esp32/cpu_start.c b/components/esp32/cpu_start.c
+index c87a7b61d..d0e2a8fe9 100644
+--- a/components/esp32/cpu_start.c
++++ b/components/esp32/cpu_start.c
+@@ -88,6 +88,7 @@ static void do_global_ctors(void);
+ static void main_task(void* args);
+ extern void app_main(void);
+ extern esp_err_t esp_pthread_init(void);
++extern void init_app_cpu_baremetal(void);
+ 
+ extern int _bss_start;
+ extern int _bss_end;
+@@ -249,6 +250,7 @@ void IRAM_ATTR call_start_cpu0()
+        With SPI RAM enabled, there's a second reason: half of the SPI RAM will be managed by the
+        app CPU, and when that is not up yet, the memory will be inaccessible and heap_caps_init may
+        fail initializing it properly. */
++    init_app_cpu_baremetal();
+     heap_caps_init();
+ 
+     ESP_EARLY_LOGI(TAG, "Pro cpu start user code");
+-- 
+2.17.1
+
