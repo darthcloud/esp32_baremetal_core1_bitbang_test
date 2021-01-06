@@ -1,17 +1,17 @@
-From ceca67a951ac57025820870328ce146fc9b9c104 Mon Sep 17 00:00:00 2001
+From 94d7146e8586aec761b78bdbb7ff3bc560a70e77 Mon Sep 17 00:00:00 2001
 From: Jacques Gagnon <darthcloud@gmail.com>
-Date: Wed, 6 Jan 2021 11:58:34 -0500
+Date: Wed, 6 Jan 2021 16:04:26 -0500
 Subject: [PATCH 2/2] Hijack level 2 interrupt for CORE1
 
 ---
- components/freertos/xtensa_vectors.S | 15 +++++++++++++++
+ components/freertos/xtensa/xtensa_vectors.S | 15 +++++++++++++++
  1 file changed, 15 insertions(+)
 
-diff --git a/components/freertos/xtensa_vectors.S b/components/freertos/xtensa_vectors.S
-index 3ddad261d..275fee4c9 100644
---- a/components/freertos/xtensa_vectors.S
-+++ b/components/freertos/xtensa_vectors.S
-@@ -1209,11 +1209,24 @@ _xt_medint2:
+diff --git a/components/freertos/xtensa/xtensa_vectors.S b/components/freertos/xtensa/xtensa_vectors.S
+index b7ddedbad..09c54e0fe 100644
+--- a/components/freertos/xtensa/xtensa_vectors.S
++++ b/components/freertos/xtensa/xtensa_vectors.S
+@@ -1161,11 +1161,24 @@ _xt_medint2:
      s32i    a0, sp, XT_STK_PS
      rsr     a0, EPC_2                       /* save interruptee's PC */
      s32i    a0, sp, XT_STK_PC
@@ -36,7 +36,7 @@ index 3ddad261d..275fee4c9 100644
      /* EXCSAVE_2 should now be free to use. Use it to keep a copy of the
      current stack pointer that points to the exception frame (XT_STK_FRAME).*/
      #ifdef XT_DEBUG_BACKTRACE
-@@ -1243,6 +1256,7 @@ _xt_medint2:
+@@ -1195,6 +1208,7 @@ _xt_medint2:
  
      /* Done handling interrupts, transfer control to OS */
      call0   XT_RTOS_INT_EXIT                /* does not return directly here */
@@ -44,7 +44,7 @@ index 3ddad261d..275fee4c9 100644
  
      /*
      Exit point for dispatch. Saved in interrupt stack frame at XT_STK_EXIT
-@@ -1253,6 +1267,7 @@ _xt_medint2:
+@@ -1205,6 +1219,7 @@ _xt_medint2:
      .align      4
  _xt_medint2_exit:
      /* Restore only level-specific regs (the rest were already restored) */

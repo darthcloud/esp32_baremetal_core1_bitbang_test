@@ -2,4 +2,4 @@
 
 Base on https://github.com/Winkelkatze/ESP32-Bare-Metal-AppCPU
 
-Work with esp-idf v4.0.2
+Work with esp-idf v4.2

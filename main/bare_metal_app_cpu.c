@@ -30,6 +30,12 @@
 #include <esp32/rom/ets_sys.h>
 #include <esp32/rom/uart.h>
 #include <soc/soc_memory_layout.h>
+#include "hal/mpu_hal.h"
+#include "hal/mpu_types.h"
+#include "soc/mpu_caps.h"
+#include "bootloader_mem.h"
+#include "xt_instr_macros.h"
+#include "xtensa/config/specreg.h"
 #include <esp_intr_alloc.h>
 #include <stdio.h>
 #include "esp32/rom/cache.h"
@@ -87,6 +93,28 @@ static void IRAM_ATTR app_cpu_main()
 // Having a volatile pointer around should force the compiler to behave.
 static void (* volatile app_cpu_main_ptr)() = &app_cpu_main;
 
+static inline void cpu_write_dtlb(uint32_t vpn, unsigned attr)
+{
+    asm volatile ("wdtlb  %1, %0; dsync\n" :: "r" (vpn), "r" (attr));
+}
+
+
+static inline void cpu_write_itlb(unsigned vpn, unsigned attr)
+{
+    asm volatile ("witlb  %1, %0; isync\n" :: "r" (vpn), "r" (attr));
+}
+
+static inline void cpu_configure_region_protection()
+{
+    const uint32_t pages_to_protect[] = {0x00000000, 0x80000000, 0xa0000000, 0xc0000000, 0xe0000000};
+    for (int i = 0; i < sizeof(pages_to_protect)/sizeof(pages_to_protect[0]); ++i) {
+        cpu_write_dtlb(pages_to_protect[i], 0xf);
+        cpu_write_itlb(pages_to_protect[i], 0xf);
+    }
+    cpu_write_dtlb(0x20000000, 0);
+    cpu_write_itlb(0x20000000, 0);
+}
+
 /*
  * This is the entry point for the APP CPU.
  * When the CPU is enabled the first time, we just "warm up" things, so we do some initialization before turning the clock off again.
@@ -95,12 +123,12 @@ static void (* volatile app_cpu_main_ptr)() = &app_cpu_main;
 static void IRAM_ATTR app_cpu_init()
 {
     // init interrupt handler
-    asm volatile (\
-        "wsr    %0, vecbase\n" \
-        ::"r"(&_init_start));
+    cpu_hal_set_vecbase(&_init_start);
 
+    /* New cpu_configure_region_protection within bootloader_init_mem fail */
+    /* Use version from v4.0.2 here and call cpu_init_memctl replacement */
     cpu_configure_region_protection();
-    cpu_init_memctl();
+    cpu_hal_init_hwloop();
 
 #ifdef APP_CPU_RESERVE_ROM_DATA
     uartAttach();
