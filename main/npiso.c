@@ -59,6 +59,8 @@ enum {
     DEV_SNES_XBAND_KB,
 };
 
+extern volatile void * _xt_intexc_hooks[];
+
 static DRAM_ATTR const uint8_t gpio_pins[NPISO_PORT_MAX][NPISO_PIN_MAX] = {
     {P1_CLK_PIN, P1_SEL_PIN, P1_D0_PIN, P1_D1_PIN},
     {P2_CLK_PIN, P2_SEL_PIN, P2_D0_PIN, P2_D1_PIN},
@@ -88,7 +90,7 @@ static void IRAM_ATTR set_data(uint8_t port, uint8_t data_id, uint8_t value) {
     }
 }
 
-void IRAM_ATTR npiso_isr(void* arg) {
+uint32_t IRAM_ATTR npiso_isr(uint32_t cause) {
     uint32_t low_io = GPIO.acpu_int;
     uint32_t high_io = GPIO.acpu_int1.intr;
     uint32_t cur_in0, cur_in1;
@@ -181,6 +183,7 @@ void IRAM_ATTR npiso_isr(void* arg) {
 
     if (high_io) GPIO.status1_w1tc.intr_st = high_io;
     if (low_io) GPIO.status_w1tc = low_io;
+    return 0;
 }
 
 void IRAM_ATTR npiso_task(void *arg) {
@@ -332,5 +335,6 @@ void npiso_init(void)
         }
     }
 
+    _xt_intexc_hooks[2] = &npiso_isr;
     intr_matrix_set(1, ETS_GPIO_INTR_SOURCE, 19);
 }
