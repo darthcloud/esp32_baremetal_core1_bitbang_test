@@ -1,16 +1,16 @@
-From 94d7146e8586aec761b78bdbb7ff3bc560a70e77 Mon Sep 17 00:00:00 2001
+From cfb6bc3268d5871321cbf41e7048338c7c7661a1 Mon Sep 17 00:00:00 2001
 From: Jacques Gagnon <darthcloud@gmail.com>
-Date: Wed, 6 Jan 2021 16:04:26 -0500
-Subject: [PATCH 2/2] Hijack level 2 interrupt for CORE1
+Date: Sun, 10 Jan 2021 19:04:55 -0500
+Subject: [PATCH 2/2] Hijack level 2 interrupt for core1
 
 ---
- components/freertos/xtensa/xtensa_vectors.S | 15 +++++++++++++++
+ components/freertos/port/xtensa/xtensa_vectors.S | 15 +++++++++++++++
  1 file changed, 15 insertions(+)
 
-diff --git a/components/freertos/xtensa/xtensa_vectors.S b/components/freertos/xtensa/xtensa_vectors.S
-index b7ddedbad..09c54e0fe 100644
---- a/components/freertos/xtensa/xtensa_vectors.S
-+++ b/components/freertos/xtensa/xtensa_vectors.S
+diff --git a/components/freertos/port/xtensa/xtensa_vectors.S b/components/freertos/port/xtensa/xtensa_vectors.S
+index 4fd27e45c..6111ca9ac 100644
+--- a/components/freertos/port/xtensa/xtensa_vectors.S
++++ b/components/freertos/port/xtensa/xtensa_vectors.S
 @@ -1161,11 +1161,24 @@ _xt_medint2:
      s32i    a0, sp, XT_STK_PS
      rsr     a0, EPC_2                       /* save interruptee's PC */

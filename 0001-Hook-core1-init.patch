@@ -1,0 +1,32 @@
+From 14c74712a56446320c332b1f68be32056f9798be Mon Sep 17 00:00:00 2001
+From: Jacques Gagnon <darthcloud@gmail.com>
+Date: Sun, 10 Jan 2021 19:04:04 -0500
+Subject: [PATCH 1/2] Hook core1 init
+
+---
+ components/esp_system/startup.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/components/esp_system/startup.c b/components/esp_system/startup.c
+index d8f4d039d..4d39bf20f 100644
+--- a/components/esp_system/startup.c
++++ b/components/esp_system/startup.c
+@@ -91,6 +91,7 @@ uint64_t g_startup_time = 0;
+ 
+ // App entry point for core 0
+ extern void esp_startup_start_app(void);
++extern void init_app_cpu_baremetal(void);
+ 
+ // Entry point for core 0 from hardware init (port layer)
+ void start_cpu0(void) __attribute__((weak, alias("start_cpu0_default"))) __attribute__((noreturn));
+@@ -197,6 +198,7 @@ static void do_core_init(void)
+        With SPI RAM enabled, there's a second reason: half of the SPI RAM will be managed by the
+        app CPU, and when that is not up yet, the memory will be inaccessible and heap_caps_init may
+        fail initializing it properly. */
++    init_app_cpu_baremetal();
+     heap_caps_init();
+     esp_newlib_init();
+     esp_newlib_time_init();
+-- 
+2.17.1
+

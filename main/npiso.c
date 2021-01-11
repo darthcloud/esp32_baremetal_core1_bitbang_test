@@ -15,8 +15,6 @@
 #include <esp32/dport_access.h>
 #include "npiso.h"
 
-#define INT_MUX_DISABLED_INTNO 6
-
 #define NPISO_PORT_MAX 2
 #define NPISO_LATCH_PIN 32
 #define NPISO_LATCH_MASK (1U << 0) /* First of 2nd bank of GPIO */
@@ -298,7 +296,7 @@ void npiso_init(void)
     io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
     io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
     gpio_config(&io_conf);
-    GPIO.pin[NPISO_LATCH_PIN].int_ena = GPIO_APP_CPU_INTR_ENA;
+    GPIO.pin[NPISO_LATCH_PIN].int_ena = BIT(0);
 
     /* Clocks */
     for (uint32_t i = 0; i < NPISO_PORT_MAX; i++) {
@@ -308,7 +306,7 @@ void npiso_init(void)
         io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
         io_conf.pull_up_en = GPIO_PULLUP_ENABLE;
         gpio_config(&io_conf);
-        GPIO.pin[gpio_pins[i][NPISO_CLK]].int_ena = GPIO_APP_CPU_INTR_ENA;
+        GPIO.pin[gpio_pins[i][NPISO_CLK]].int_ena = BIT(0);
     }
 
     /* Selects */

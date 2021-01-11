@@ -30,13 +30,9 @@
 #include <esp32/rom/ets_sys.h>
 #include <esp32/rom/uart.h>
 #include <soc/soc_memory_layout.h>
-#include "hal/mpu_hal.h"
-#include "hal/mpu_types.h"
-#include "soc/mpu_caps.h"
-#include "bootloader_mem.h"
 #include "xt_instr_macros.h"
 #include "xtensa/config/specreg.h"
-#include <esp_intr_alloc.h>
+#include <xtensa/xtensa_api.h>
 #include <stdio.h>
 #include "esp32/rom/cache.h"
 #include "npiso.h"
@@ -55,7 +51,7 @@
 #endif
 
 // Interrupt vector, this comes from the SDK
-extern int _init_start;
+extern int _vector_table;
 
 static volatile uint32_t app_cpu_stack_ptr;
 static volatile uint8_t app_cpu_initial_start;
@@ -77,7 +73,7 @@ static char hello_world[] = "Hello World!\n";
 static void IRAM_ATTR app_cpu_main()
 {
     // User code goes here
-    ESP_INTR_ENABLE(19);
+    xt_int_enable_mask(1 << 19);
 
     //npiso_task(NULL);
     while (1) {
@@ -123,7 +119,7 @@ static inline void cpu_configure_region_protection()
 static void IRAM_ATTR app_cpu_init()
 {
     // init interrupt handler
-    cpu_hal_set_vecbase(&_init_start);
+    cpu_hal_set_vecbase(&_vector_table);
 
     /* New cpu_configure_region_protection within bootloader_init_mem fail */
     /* Use version from v4.0.2 here and call cpu_init_memctl replacement */
